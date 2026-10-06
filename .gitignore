@@ -1,0 +1,21 @@
+# Node & Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+frontend/dist/
+frontend/node_modules/
+backend/node_modules/
+
+# Local databases & runtime caches
+*.db-wal
+*.db-shm
+backend/data/uploads/
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local

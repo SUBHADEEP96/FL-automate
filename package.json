@@ -1,0 +1,18 @@
+{
+  "name": "flautomate",
+  "version": "1.0.0",
+  "description": "Internal POS Billing, Inventory Ledger & Automated West Bengal Excise Compliance (e-Abgari / WBSBCL) Retail System",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "concurrently \"node backend/server.js\" \"npm.cmd --prefix frontend run dev\"",
+    "dev": "concurrently \"node backend/server.js\" \"npm.cmd --prefix frontend run dev\"",
+    "dev:backend": "node backend/server.js",
+    "dev:frontend": "npm.cmd --prefix frontend run dev",
+    "build": "npm.cmd --prefix frontend run build",
+    "seed": "node backend/db/seed.js",
+    "test:compliance": "node backend/tests/testCompliance.js"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
