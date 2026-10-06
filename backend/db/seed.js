@@ -1,75 +1,98 @@
 const db = require('./database');
 
 function seedDatabase() {
-  console.log('[Seed] Seeding database with authentic West Bengal Excise data...');
+  console.log('[Seed] Seeding database for Krishnanagar, Nadia FL Off-Shop...');
 
-  // 1. Shop Settings
-  const checkSettings = db.prepare('SELECT id FROM shop_settings WHERE id = 1').get();
-  if (!checkSettings) {
+  // 1. Shop Settings (Krishnanagar, Nadia, West Bengal)
+  const existingSettings = db.prepare('SELECT id FROM shop_settings WHERE id = 1').get();
+  const settingsData = {
+    id: 1,
+    shop_name: 'KRISHNANAGAR FL OFF SHOP',
+    license_no: 'WB/EX/FL/NAD-KRN/0188/2024-25',
+    licensee_name: 'M/s Krishnanagar Retail Beverages',
+    district: 'Nadia',
+    excise_range: 'Krishnanagar Excise Range',
+    address: 'High Street, Near Post Office More, Krishnanagar, Nadia, West Bengal - 741101',
+    gstin: '19AABCK9921E1Z4',
+    retailer_code: 'WBSBCL-RET-NAD-4102',
+    portal_username: 'RET_NAD_4102',
+    portal_password: 'ExciseNadia@2026!',
+    portal_url: 'http://localhost:5001/portal-simulator',
+    auto_submit_enabled: 1,
+    printer_width_mm: 80,
+    footer_message: 'Krishnanagar FL Off-Shop (Nadia). Excise Regulated. Alcohol is injurious to health. Drink responsibly.'
+  };
+
+  if (!existingSettings) {
     db.prepare(`
       INSERT INTO shop_settings (
         id, shop_name, license_no, licensee_name, district, excise_range, address, gstin,
         retailer_code, portal_username, portal_password, portal_url, auto_submit_enabled,
         printer_width_mm, footer_message
       ) VALUES (
-        1,
-        'NEW SHYAMBAZAR FL OFF SHOP',
-        'WB/EX/FL/KOL-NORTH/0492/2024-25',
-        'M/s Ghosh & Banerjee Enterprises',
-        'Kolkata North',
-        'Cossipore - Shyambazar Range',
-        '142/A, Bidhan Sarani, Shyambazar 5-Point, Kolkata - 700004',
-        '19AAACG1234E1Z8',
-        'WBSBCL-RET-KOL-8912',
-        'RET_KOL_8912',
-        'ExciseWb@2026!',
-        'http://localhost:5001/portal-simulator',
-        1,
-        80,
-        'Government of WB Excise Regulated Retail Outlet. Statutory Warning: Alcohol consumption is injurious to health. Be safe - Don''t Drink and Drive.'
+        @id, @shop_name, @license_no, @licensee_name, @district, @excise_range, @address, @gstin,
+        @retailer_code, @portal_username, @portal_password, @portal_url, @auto_submit_enabled,
+        @printer_width_mm, @footer_message
       )
-    `).run();
-    console.log('✓ Shop settings initialized.');
+    `).run(settingsData);
+  } else {
+    db.prepare(`
+      UPDATE shop_settings SET
+        shop_name = @shop_name,
+        license_no = @license_no,
+        licensee_name = @licensee_name,
+        district = @district,
+        excise_range = @excise_range,
+        address = @address,
+        gstin = @gstin,
+        retailer_code = @retailer_code,
+        portal_username = @portal_username,
+        portal_password = @portal_password,
+        portal_url = @portal_url,
+        footer_message = @footer_message
+      WHERE id = 1
+    `).run(settingsData);
   }
+  console.log('✓ Store profile set to Krishnanagar, Nadia, West Bengal.');
 
-  // 2. Product Master
+  // 2. Product Master (Standard West Bengal catalog)
   const existingProducts = db.prepare('SELECT COUNT(*) as count FROM products').get().count;
   if (existingProducts === 0) {
     const productsData = [
       // Royal Challenge
-      { code: 'IMFL-RC-750', ean: '8901234001017', name: 'Royal Challenge Select Premium Whisky (750ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 780.0, cost_price: 630.0, stock: 48 },
-      { code: 'IMFL-RC-375', ean: '8901234001024', name: 'Royal Challenge Select Premium Whisky (375ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 400.0, cost_price: 325.0, stock: 64 },
-      { code: 'IMFL-RC-180', ean: '8901234001031', name: 'Royal Challenge Select Premium Whisky (180ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 200.0, cost_price: 162.0, stock: 96 },
+      { code: 'IMFL-RC-750', ean: '8901234001017', name: 'Royal Challenge Premium Whisky (750ml Quart)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 780.0, cost_price: 630.0, stock: 48 },
+      { code: 'IMFL-RC-375', ean: '8901234001024', name: 'Royal Challenge Premium Whisky (375ml Pint)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 400.0, cost_price: 325.0, stock: 64 },
+      { code: 'IMFL-RC-180', ean: '8901234001031', name: 'Royal Challenge Premium Whisky (180ml Nip)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 200.0, cost_price: 162.0, stock: 96 },
 
       // McDowell's No.1
-      { code: 'IMFL-MCD-750', ean: '8901234002014', name: "McDowell's No.1 Reserve Whisky (750ml)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 620.0, cost_price: 505.0, stock: 60 },
-      { code: 'IMFL-MCD-375', ean: '8901234002021', name: "McDowell's No.1 Reserve Whisky (375ml)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 320.0, cost_price: 260.0, stock: 72 },
-      { code: 'IMFL-MCD-180', ean: '8901234002038', name: "McDowell's No.1 Reserve Whisky (180ml)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 160.0, cost_price: 130.0, stock: 120 },
+      { code: 'IMFL-MCD-750', ean: '8901234002014', name: "McDowell's No.1 Reserve Whisky (750ml Quart)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 620.0, cost_price: 505.0, stock: 60 },
+      { code: 'IMFL-MCD-375', ean: '8901234002021', name: "McDowell's No.1 Reserve Whisky (375ml Pint)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 320.0, cost_price: 260.0, stock: 72 },
+      { code: 'IMFL-MCD-180', ean: '8901234002038', name: "McDowell's No.1 Reserve Whisky (180ml Nip)", category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 160.0, cost_price: 130.0, stock: 120 },
 
       // Royal Stag
-      { code: 'IMFL-RS-750', ean: '8901234003011', name: 'Royal Stag Premier Special Whisky (750ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 680.0, cost_price: 550.0, stock: 45 },
-      { code: 'IMFL-RS-375', ean: '8901234003028', name: 'Royal Stag Premier Special Whisky (375ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 350.0, cost_price: 285.0, stock: 50 },
-      { code: 'IMFL-RS-180', ean: '8901234003035', name: 'Royal Stag Premier Special Whisky (180ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 180.0, cost_price: 145.0, stock: 80 },
+      { code: 'IMFL-RS-750', ean: '8901234003011', name: 'Royal Stag Special Whisky (750ml Quart)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 680.0, cost_price: 550.0, stock: 45 },
+      { code: 'IMFL-RS-375', ean: '8901234003028', name: 'Royal Stag Special Whisky (375ml Pint)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 350.0, cost_price: 285.0, stock: 50 },
+      { code: 'IMFL-RS-180', ean: '8901234003035', name: 'Royal Stag Special Whisky (180ml Nip)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 180.0, cost_price: 145.0, stock: 80 },
 
       // Blenders Pride
-      { code: 'IMFL-BP-750', ean: '8901234004018', name: 'Blenders Pride Rare Premium Whisky (750ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 920.0, cost_price: 745.0, stock: 36 },
-      { code: 'IMFL-BP-375', ean: '8901234004025', name: 'Blenders Pride Rare Premium Whisky (375ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 470.0, cost_price: 380.0, stock: 40 },
-      { code: 'IMFL-BP-180', ean: '8901234004032', name: 'Blenders Pride Rare Premium Whisky (180ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 240.0, cost_price: 195.0, stock: 60 },
+      { code: 'IMFL-BP-750', ean: '8901234004018', name: 'Blenders Pride Rare Whisky (750ml Quart)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 920.0, cost_price: 745.0, stock: 36 },
+      { code: 'IMFL-BP-375', ean: '8901234004025', name: 'Blenders Pride Rare Whisky (375ml Pint)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 375, strength_pct: 42.8, mrp: 470.0, cost_price: 380.0, stock: 40 },
+      { code: 'IMFL-BP-180', ean: '8901234004032', name: 'Blenders Pride Rare Whisky (180ml Nip)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 180, strength_pct: 42.8, mrp: 240.0, cost_price: 195.0, stock: 60 },
 
       // Antiquity Blue
-      { code: 'IMFL-ANT-750', ean: '8901234005015', name: 'Antiquity Blue Ultra Premium Whisky (750ml)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 1150.0, cost_price: 935.0, stock: 24 },
+      { code: 'IMFL-ANT-750', ean: '8901234005015', name: 'Antiquity Blue Ultra Premium Whisky (750ml Quart)', category: 'IMFL', sub_category: 'Whisky', pack_size_ml: 750, strength_pct: 42.8, mrp: 1150.0, cost_price: 935.0, stock: 24 },
 
       // Old Monk Rum
-      { code: 'IMFL-OM-750', ean: '8901234006012', name: 'Old Monk XXX Very Old Vatted Rum (750ml)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 750, strength_pct: 42.8, mrp: 560.0, cost_price: 450.0, stock: 72 },
-      { code: 'IMFL-OM-375', ean: '8901234006029', name: 'Old Monk XXX Very Old Vatted Rum (375ml)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 375, strength_pct: 42.8, mrp: 290.0, cost_price: 235.0, stock: 60 },
-      { code: 'IMFL-OM-180', ean: '8901234006036', name: 'Old Monk XXX Very Old Vatted Rum (180ml)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 180, strength_pct: 42.8, mrp: 150.0, cost_price: 120.0, stock: 100 },
+      { code: 'IMFL-OM-750', ean: '8901234006012', name: 'Old Monk XXX Vatted Rum (750ml Quart)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 750, strength_pct: 42.8, mrp: 560.0, cost_price: 450.0, stock: 72 },
+      { code: 'IMFL-OM-375', ean: '8901234006029', name: 'Old Monk XXX Vatted Rum (375ml Pint)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 375, strength_pct: 42.8, mrp: 290.0, cost_price: 235.0, stock: 60 },
+      { code: 'IMFL-OM-180', ean: '8901234006036', name: 'Old Monk XXX Vatted Rum (180ml Nip)', category: 'IMFL', sub_category: 'Rum', pack_size_ml: 180, strength_pct: 42.8, mrp: 150.0, cost_price: 120.0, stock: 100 },
 
       // Magic Moments Vodka
-      { code: 'IMFL-MM-750', ean: '8901234007019', name: 'Magic Moments Grain Vodka (750ml)', category: 'IMFL', sub_category: 'Vodka', pack_size_ml: 750, strength_pct: 42.8, mrp: 600.0, cost_price: 485.0, stock: 36 },
-      { code: 'IMFL-MM-375', ean: '8901234007026', name: 'Magic Moments Grain Vodka (375ml)', category: 'IMFL', sub_category: 'Vodka', pack_size_ml: 375, strength_pct: 42.8, mrp: 310.0, cost_price: 250.0, stock: 40 },
+      { code: 'IMFL-MM-750', ean: '8901234007019', name: 'Magic Moments Grain Vodka (750ml Quart)', category: 'IMFL', sub_category: 'Vodka', pack_size_ml: 750, strength_pct: 42.8, mrp: 600.0, cost_price: 485.0, stock: 36 },
+      { code: 'IMFL-MM-375', ean: '8901234007026', name: 'Magic Moments Grain Vodka (375ml Pint)', category: 'IMFL', sub_category: 'Vodka', pack_size_ml: 375, strength_pct: 42.8, mrp: 310.0, cost_price: 250.0, stock: 40 },
 
       // Blue Riband Gin
-      { code: 'IMFL-BRG-750', ean: '8901234008016', name: 'Blue Riband Extra Dry Gin (750ml)', category: 'IMFL', sub_category: 'Gin', pack_size_ml: 750, strength_pct: 42.8, mrp: 540.0, cost_price: 435.0, stock: 24 },
+      { code: 'IMFL-BRG-750', ean: '8901234008016', name: 'Blue Riband Extra Dry Gin (750ml Quart)', category: 'IMFL', sub_category: 'Gin', pack_size_ml: 750, strength_pct: 42.8, mrp: 540.0, cost_price: 435.0, stock: 24 },
 
       // Beer
       { code: 'BEER-KFS-650', ean: '8901234009013', name: 'Kingfisher Strong Premium Beer (650ml Bottle)', category: 'Beer', sub_category: 'Strong Beer', pack_size_ml: 650, strength_pct: 8.0, mrp: 160.0, cost_price: 125.0, stock: 120 },
@@ -80,9 +103,9 @@ function seedDatabase() {
       { code: 'BEER-BIR-500', ean: '8901234012013', name: 'Bira 91 Boom Super Strong (500ml Can)', category: 'Beer', sub_category: 'Strong Beer', pack_size_ml: 500, strength_pct: 7.5, mrp: 150.0, cost_price: 118.0, stock: 48 },
 
       // Wine
-      { code: 'WINE-SUL-SH-750', ean: '8901234013010', name: 'Sula Shiraz Cabernet Red Wine (750ml)', category: 'Wine', sub_category: 'Red Wine', pack_size_ml: 750, strength_pct: 13.5, mrp: 890.0, cost_price: 710.0, stock: 24 },
-      { code: 'WINE-SUL-CH-750', ean: '8901234013027', name: 'Sula Chenin Blanc White Wine (750ml)', category: 'Wine', sub_category: 'White Wine', pack_size_ml: 750, strength_pct: 12.0, mrp: 790.0, cost_price: 630.0, stock: 18 },
-      { code: 'WINE-JC-SH-750', ean: '8901234014017', name: "Jacob's Creek Classic Shiraz (750ml)", category: 'Wine', sub_category: 'Imported Wine', pack_size_ml: 750, strength_pct: 13.9, mrp: 1250.0, cost_price: 1010.0, stock: 12 },
+      { code: 'WINE-SUL-SH-750', ean: '8901234013010', name: 'Sula Shiraz Cabernet Red Wine (750ml Quart)', category: 'Wine', sub_category: 'Red Wine', pack_size_ml: 750, strength_pct: 13.5, mrp: 890.0, cost_price: 710.0, stock: 24 },
+      { code: 'WINE-SUL-CH-750', ean: '8901234013027', name: 'Sula Chenin Blanc White Wine (750ml Quart)', category: 'Wine', sub_category: 'White Wine', pack_size_ml: 750, strength_pct: 12.0, mrp: 790.0, cost_price: 630.0, stock: 18 },
+      { code: 'WINE-JC-SH-750', ean: '8901234014017', name: "Jacob's Creek Classic Shiraz (750ml Quart)", category: 'Wine', sub_category: 'Imported Wine', pack_size_ml: 750, strength_pct: 13.9, mrp: 1250.0, cost_price: 1010.0, stock: 12 },
 
       // Country Spirit (CS)
       { code: 'CS-ASMANI-600', ean: '8901234015014', name: 'Bengal Asmani Country Spirit (600ml Bottle)', category: 'CS', sub_category: 'Country Spirit', pack_size_ml: 600, strength_pct: 28.5, mrp: 110.0, cost_price: 88.0, stock: 150 }
@@ -104,8 +127,7 @@ function seedDatabase() {
         const result = insertProduct.run(prod);
         const productId = result.lastInsertRowid;
 
-        // Generate sample West Bengal 2D DataMatrix Security Holograms for each product in stock
-        const hologramsToCreate = Math.min(prod.stock, 5); // seed up to 5 individual serials for instant scanning
+        const hologramsToCreate = Math.min(prod.stock, 5);
         for (let i = 0; i < hologramsToCreate; i++) {
           hologramCounter++;
           const serial = `WB26EX${prod.pack_size_ml}${hologramCounter}`;
@@ -118,7 +140,7 @@ function seedDatabase() {
     console.log(`✓ Seeded ${productsData.length} products and security holograms.`);
   }
 
-  // 3. Seed an Inward Challan for audit trail
+  // 3. Seed Inward Challan for Nadia Depot
   const existingChallans = db.prepare('SELECT COUNT(*) as count FROM inward_challans').get().count;
   if (existingChallans === 0) {
     const today = new Date().toISOString().slice(0, 10);
@@ -126,20 +148,19 @@ function seedDatabase() {
       INSERT INTO inward_challans (challan_no, challan_date, source_depot, vehicle_no, total_cases, total_bottles, total_amount, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'VERIFIED')
     `);
-    const challanResult = challanStmt.run(
-      'WBSBCL/KOL/2026/CH-91402',
+    challanStmt.run(
+      'WBSBCL/NAD/2026/CH-41092',
       today,
-      'WBSBCL Central Depot - Cossipore, Kolkata',
-      'WB-02-AK-4491',
+      'WBSBCL Kalyani / Ranaghat Depot, Nadia',
+      'WB-52-B-8812',
       24,
       384,
       186400.0
     );
-
-    console.log('✓ Seeded sample WBSBCL Inward Challan.');
+    console.log('✓ Seeded sample WBSBCL Nadia Depot Inward Challan.');
   }
 
-  console.log('[Seed] Database initialization complete.');
+  console.log('[Seed] Database initialization complete for Krishnanagar.');
 }
 
 if (require.main === module) {

@@ -2,18 +2,18 @@
 
 @layer base {
   :root {
-    --color-counter-bg: #0b0f19;
-    --color-counter-card: #111827;
-    --color-counter-border: #1f2937;
+    --color-counter-bg: #0b1120;
+    --color-counter-card: #131d33;
+    --color-counter-border: #1e293b;
     --color-counter-accent: #10b981;
     --color-counter-amber: #f59e0b;
     --color-counter-red: #ef4444;
   }
 
   body {
-    background-color: #090d16;
-    color: #f3f4f6;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #0b1120;
+    color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     user-select: none;
     -webkit-font-smoothing: antialiased;
     margin: 0;
@@ -22,27 +22,41 @@
   }
 }
 
-/* Custom scrollbars for high density tables */
+/* Custom scrollbars for clean lists */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1322;
+  background: #0f172a;
 }
 ::-webkit-scrollbar-thumb {
-  background: #25334d;
-  border-radius: 3px;
+  background: #334155;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: #475569;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Receipt paper styling */
+/* Card hover glow effects */
+.pos-card-hover {
+  transition: all 0.15s ease-in-out;
+}
+.pos-card-hover:hover {
+  transform: translateY(-1px);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.pos-btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Receipt paper styling for window.print() */
 @media print {
   body * {
     visibility: hidden;
@@ -55,5 +69,7 @@
     left: 0;
     top: 0;
     width: 80mm;
+    margin: 0;
+    padding: 0;
   }
 }
