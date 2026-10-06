@@ -6,11 +6,7 @@ import {
   QrCode, 
   Trash2, 
   Printer, 
-  Sparkles, 
-  CheckCircle2, 
-  ShieldCheck, 
-  Zap,
-  Layers
+  ShoppingBag
 } from 'lucide-react';
 import { Product, CartItem, SaleTransaction, PaymentMode } from '../../types';
 import { CartTable } from './CartTable';
@@ -25,12 +21,16 @@ interface CashierScreenProps {
   products: Product[];
   onSaleCompleted?: (sale: SaleTransaction) => void;
   onRefreshProducts: () => void;
+  onNavigateTab?: (tab: 'pos' | 'ledger' | 'challan' | 'compliance' | 'settings') => void;
+  onOpenInwardChallan?: () => void;
 }
 
 export const CashierScreen: React.FC<CashierScreenProps> = ({
   products,
   onSaleCompleted,
-  onRefreshProducts
+  onRefreshProducts,
+  onNavigateTab,
+  onOpenInwardChallan
 }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -39,7 +39,9 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('CASH');
   const [recentSale, setRecentSale] = useState<SaleTransaction | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState<boolean>(false);
-  const [scanFeedback, setScanFeedback] = useState<string>('Barcode Wedge Active');
+  const [scanFeedback, setScanFeedback] = useState<string>('✓ Scanner Ready');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
+  const [quickSearchQuery, setQuickSearchQuery] = useState<string>('');
 
   const { printReceipt, isPrinting, connectionType } = useThermalPrinter();
 
@@ -89,7 +91,7 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
     });
   };
 
-  // Attach hologram to currently selected or matching item
+  // Attach hologram to item
   const attachHologramToCart = (hologramSerial: string, matchedProduct?: Product) => {
     if (matchedProduct) {
       addProductToCart(matchedProduct, hologramSerial);
@@ -111,28 +113,28 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
     });
   };
 
-  // Keyboard wedge scanner hook listener
+  // Barcode scanner wedge listener
   const { triggerManualScan } = useBarcodeScanner({
     enabled: !isCatalogOpen && !isPaymentOpen && !isReceiptOpen,
     onScan: (res: ScanResult) => {
       if (res.type === 'PRODUCT' && res.product) {
         addProductToCart(res.product as Product);
-        setScanFeedback(`✓ Scanned: ${res.product.name}`);
+        setScanFeedback(`✓ Added: ${res.product.name}`);
       } else if (res.type === 'HOLOGRAM') {
         const matchingProd = res.product as Product | undefined;
         attachHologramToCart(res.hologramSerial || res.rawBarcode, matchingProd);
-        setScanFeedback(`✓ Hologram Verified: ${res.hologramSerial || res.rawBarcode}`);
+        setScanFeedback(`✓ Hologram Linked: ${res.hologramSerial || res.rawBarcode}`);
       } else {
-        setScanFeedback(`✕ Unknown barcode: ${res.rawBarcode}`);
+        setScanFeedback(`✕ Unknown Code: ${res.rawBarcode}`);
       }
     }
   });
 
-  // Hotkey listener on window
+  // Global hotkeys
   useEffect(() => {
     const handleGlobalHotkeys = (e: KeyboardEvent) => {
       if (isCatalogOpen || isPaymentOpen || isReceiptOpen) {
-        return; // Modal handles its own escape/enter
+        return;
       }
 
       if (e.key === 'F1') {
@@ -158,7 +160,7 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
       } else if (e.key === 'Escape') {
         e.preventDefault();
         if (cartItems.length > 0) {
-          if (confirm('Clear current bill items?')) {
+          if (confirm('Are you sure you want to clear all items in the current bill? [Esc]')) {
             setCartItems([]);
           }
         }
@@ -207,7 +209,7 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
   const handleOpenHologramPrompt = (idx: number) => {
     const item = cartItems[idx];
     if (!item) return;
-    const serial = prompt(`Enter or Scan West Bengal 2D Hologram Serial for ${item.name}:`, `WB26EX${item.packSizeMl}${Date.now().toString().slice(-6)}`);
+    const serial = prompt(`Enter or Scan 2D Hologram Serial for ${item.name}:`, `WB26EX${item.packSizeMl}${Date.now().toString().slice(-6)}`);
     if (serial && serial.trim()) {
       setCartItems(prev => {
         const updated = [...prev];
@@ -229,6 +231,14 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
   const totalBL = cartItems.reduce((acc, it) => acc + it.bulkLitres, 0);
   const totalLPL = cartItems.reduce((acc, it) => acc + it.londonProofLitres, 0);
 
+  // Filter products for right panel
+  const displayProducts = products.filter(p => {
+    const matchesCategory = selectedCategoryFilter === 'ALL' || p.category === selectedCategoryFilter;
+    const q = quickSearchQuery.toLowerCase().trim();
+    const matchesQuery = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.ean.includes(q);
+    return matchesCategory && matchesQuery;
+  });
+
   // Commit sale to backend
   const handleConfirmPayment = async (payData: {
     paymentMode: PaymentMode;
@@ -239,7 +249,7 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
     try {
       const payload = {
         cashierId: 'COUNTER_01',
-        cashierName: 'S. Banerjee',
+        cashierName: 'Krishnanagar Staff',
         paymentMode: payData.paymentMode,
         subtotal: totalSubtotal,
         discount: 0,
@@ -272,7 +282,6 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
       setIsPaymentOpen(false);
       setIsReceiptOpen(true);
 
-      // Auto-trigger ESC/POS print if WebUSB / WebSerial printer is connected
       if (connectionType !== 'NONE' && connectionType !== 'BROWSER_DIALOG') {
         printReceipt(completedSale);
       }
@@ -285,44 +294,71 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col p-3 gap-3 overflow-hidden select-none">
-      {/* Top Counter Metrics Banner */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
+    <div className="flex-1 flex flex-col p-3.5 gap-3.5 overflow-hidden select-none bg-slate-100">
+      {/* Top Banner: Crisp White Card with Huge Total */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-6">
-          <div>
-            <div className="text-[11px] font-mono text-slate-400">TOTAL PAYABLE</div>
-            <div className="text-3xl font-mono font-black text-emerald-400 tracking-tight tabular-nums">
+          <div className="bg-emerald-50 border-2 border-emerald-500 px-5 py-2.5 rounded-2xl">
+            <div className="text-xs font-black text-emerald-800 uppercase tracking-wider">
+              BILL TOTAL
+            </div>
+            <div className="text-3xl sm:text-4xl font-mono font-black text-emerald-700 tracking-tight tabular-nums">
               {formatINR(totalSubtotal)}
             </div>
           </div>
-          <div className="h-8 w-px bg-slate-800" />
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <div>
-              <span className="text-slate-400">Bottles: </span>
-              <strong className="text-white text-sm">{totalBottles}</strong>
+
+          <div className="h-10 w-px bg-slate-200 hidden sm:block" />
+
+          <div className="flex items-center gap-4 text-sm font-sans">
+            <div className="bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
+              <span className="text-slate-500 text-xs font-semibold">Bottles: </span>
+              <strong className="text-slate-900 font-mono text-base font-black ml-1">{totalBottles} pcs</strong>
             </div>
-            <div>
-              <span className="text-slate-400">Bulk Litres: </span>
-              <strong className="text-cyan-400 text-sm">{formatBL(totalBL)}</strong>
+            <div className="bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
+              <span className="text-slate-500 text-xs font-semibold">Bulk Litres: </span>
+              <strong className="text-blue-700 font-mono text-base font-bold ml-1">{formatBL(totalBL)}</strong>
             </div>
-            <div>
-              <span className="text-slate-400">London Proof: </span>
-              <strong className="text-amber-400 text-sm">{formatLPL(totalLPL)}</strong>
+            <div className="bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
+              <span className="text-slate-500 text-xs font-semibold">Proof Litres: </span>
+              <strong className="text-amber-700 font-mono text-base font-bold ml-1">{formatLPL(totalLPL)}</strong>
             </div>
           </div>
         </div>
 
-        {/* Scanner Wedge Status Pill */}
-        <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-mono">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-          <span className="text-slate-300 font-semibold">{scanFeedback}</span>
+        {/* Right Utility & Quick Jump Actions */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('ledger')}
+              className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border-2 border-teal-300 rounded-xl text-xs font-black flex items-center gap-1 transition-colors shadow-xs pos-btn-press cursor-pointer"
+              title="Open Daily Stock Register (DSR)"
+            >
+              <span>Stock Register [F9]</span>
+            </button>
+          )}
+
+          {onOpenInwardChallan && (
+            <button
+              onClick={onOpenInwardChallan}
+              className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-xl text-xs font-black flex items-center gap-1 transition-colors shadow-xs pos-btn-press cursor-pointer"
+              title="Record Inward Depot Challan"
+            >
+              <span>Inward Challan [F8]</span>
+            </button>
+          )}
+
+          {/* Live Scanner Indicator */}
+          <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border-2 border-emerald-300 text-xs font-black text-emerald-800 shadow-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+            <span>{scanFeedback}</span>
+          </div>
         </div>
       </div>
 
-      {/* Main Split Body: Left Cart, Right Actions & Scanner Sweep Simulator */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-3 overflow-hidden">
+      {/* Main Split: Left Cart, Right Touch Picker & Big Checkout Buttons */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-3.5 overflow-hidden">
         {/* Left Side: Cart Table */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-[3] flex flex-col overflow-hidden">
           <CartTable
             items={cartItems}
             selectedIndex={selectedIndex}
@@ -333,159 +369,187 @@ export const CashierScreen: React.FC<CashierScreenProps> = ({
           />
         </div>
 
-        {/* Right Side: Quick Action & Scanner Simulation Panel */}
-        <div className="w-full lg:w-80 flex flex-col gap-3">
-          {/* Quick Barcode Simulator / Manual Sweep Tool */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-              <Barcode className="w-4 h-4 text-emerald-400" />
-              <span>Barcode & Hologram Sweeper</span>
+        {/* Right Side: Friendly Quick Picker & Big Checkout Buttons */}
+        <div className="flex-[2] flex flex-col gap-3 overflow-hidden">
+          {/* Quick Search & Category Filter Box */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm flex flex-col gap-2.5">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={quickSearchQuery}
+                onChange={e => setQuickSearchQuery(e.target.value)}
+                placeholder="🔍 Search brand name, SKU code, or scan barcode..."
+                className="w-full bg-slate-50 border-2 border-slate-200 focus:border-blue-500 rounded-xl pl-10 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
+              />
             </div>
 
-            <div className="space-y-1.5">
-              <div className="text-[11px] text-slate-400">
-                Click sample sweep to test &lt;40ms wedge parsing:
-              </div>
-              <div className="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+            {/* Category Filter Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              {[
+                { id: 'ALL', label: 'All Brands' },
+                { id: 'IMFL', label: 'IMFL Spirits' },
+                { id: 'Beer', label: 'Beer' },
+                { id: 'Wine', label: 'Wine' },
+                { id: 'CS', label: 'Country Spirit (CS)' }
+              ].map(cat => (
                 <button
-                  onClick={() => triggerManualScan('8901234001017')}
-                  className="p-1.5 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded text-left truncate hover:border-emerald-500 transition-colors"
-                  title="Royal Challenge 750ml"
+                  key={cat.id}
+                  onClick={() => setSelectedCategoryFilter(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap pos-btn-press cursor-pointer ${
+                    selectedCategoryFilter === cat.id
+                      ? 'bg-blue-600 text-white shadow-sm font-black'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                  }`}
                 >
-                  ⚡ RC 750ml
-                </button>
-                <button
-                  onClick={() => triggerManualScan('8901234009013')}
-                  className="p-1.5 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded text-left truncate hover:border-emerald-500 transition-colors"
-                  title="Kingfisher Strong 650ml"
-                >
-                  ⚡ KF Strong
-                </button>
-                <button
-                  onClick={() => triggerManualScan('8901234002038')}
-                  className="p-1.5 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded text-left truncate hover:border-emerald-500 transition-colors"
-                  title="McDowell's 180ml"
-                >
-                  ⚡ McD 180ml
-                </button>
-                <button
-                  onClick={() => triggerManualScan('8901234013010')}
-                  className="p-1.5 bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-800 rounded text-left truncate hover:border-emerald-500 transition-colors"
-                  title="Sula Shiraz 750ml"
-                >
-                  ⚡ Sula Red
-                </button>
-                <button
-                  onClick={() => triggerManualScan(`WB26EX750${Math.floor(10000 + Math.random() * 90000)}`)}
-                  className="col-span-2 p-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-800/60 rounded text-center truncate font-bold flex items-center justify-center gap-1 transition-colors"
-                >
-                  <ShieldCheck className="w-3 h-3 text-amber-400" />
-                  <span>Scan 2D Hologram DataMatrix</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Counter Fast-Picks (Top Sellers) */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Fast Counter Picks</span>
-              </span>
-              <button
-                onClick={() => setIsCatalogOpen(true)}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-mono font-bold flex items-center gap-1"
-              >
-                <span>[F1] All</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 overflow-y-auto flex-1 max-h-48">
-              {products.slice(0, 6).map(prod => (
-                <button
-                  key={prod.id}
-                  onClick={() => addProductToCart(prod)}
-                  className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-left transition-all active:scale-95 group"
-                >
-                  <div className="font-semibold text-white text-xs truncate group-hover:text-emerald-400">
-                    {prod.name.split('(')[0]}
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono mt-1">
-                    <span>{prod.pack_size_ml}ml</span>
-                    <span className="font-bold text-emerald-400">{formatINR(prod.mrp)}</span>
-                  </div>
+                  {cat.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Primary Checkout Action Buttons */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
-            <button
-              onClick={() => {
-                setPaymentMode('CASH');
-                setIsPaymentOpen(true);
-              }}
-              disabled={cartItems.length === 0}
-              className={`w-full py-3 px-4 rounded-xl font-black text-sm flex items-center justify-between transition-all ${
-                cartItems.length === 0
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950 active:scale-95'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <Banknote className="w-5 h-5" />
-                <span>CASH CHECKOUT</span>
+          {/* Quick Touch/Click Brand Grid */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-3.5 flex-1 flex flex-col overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                <span>Quick Brand Touch Picker (Click to Add)</span>
               </span>
-              <span className="font-mono text-xs bg-black/30 px-2 py-0.5 rounded font-bold">
-                F2
-              </span>
-            </button>
+              <button
+                onClick={() => setIsCatalogOpen(true)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-extrabold font-mono cursor-pointer"
+              >
+                [F1] Full Catalog
+              </button>
+            </div>
 
-            <button
-              onClick={() => {
-                setPaymentMode('UPI');
-                setIsPaymentOpen(true);
-              }}
-              disabled={cartItems.length === 0}
-              className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-between transition-all ${
-                cartItems.length === 0
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md active:scale-95'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <QrCode className="w-4 h-4" />
-                <span>UPI / QR CODE</span>
-              </span>
-              <span className="font-mono text-xs bg-black/30 px-2 py-0.5 rounded">
-                F3
-              </span>
-            </button>
+            {/* Product Cards Grid */}
+            <div className="grid grid-cols-2 gap-2.5 overflow-y-auto flex-1 pr-1">
+              {displayProducts.slice(0, 10).map(prod => (
+                <button
+                  key={prod.id}
+                  onClick={() => addProductToCart(prod)}
+                  className="p-3 bg-slate-50 hover:bg-blue-50/60 border border-slate-200 hover:border-blue-400 rounded-xl text-left transition-all pos-btn-press flex flex-col justify-between group shadow-sm cursor-pointer"
+                >
+                  <div>
+                    <div className="font-extrabold text-slate-900 text-sm group-hover:text-blue-700 line-clamp-1">
+                      {prod.name.split('(')[0]}
+                    </div>
+                    <div className="text-[11px] font-bold text-blue-700 mt-0.5">
+                      {prod.pack_size_ml === 750 ? '750ml (Quart)' :
+                       prod.pack_size_ml === 375 ? '375ml (Pint)' :
+                       prod.pack_size_ml === 180 ? '180ml (Nip)' :
+                       prod.pack_size_ml === 650 ? '650ml (Beer)' :
+                       `${prod.pack_size_ml}ml`}
+                    </div>
+                  </div>
 
-            <div className="flex gap-2 pt-1">
+                  <div className="flex items-center justify-between mt-2.5 pt-1.5 border-t border-slate-200">
+                    <span className="text-base font-black font-mono text-emerald-700">
+                      {formatINR(prod.mrp)}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      Stock: {prod.current_stock}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Test Barcode Sweeps for Training */}
+            <div className="mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono">
+              <span className="text-slate-500 font-bold flex items-center gap-1 whitespace-nowrap">
+                <Barcode className="w-3.5 h-3.5 text-blue-600" />
+                <span>Test Scans:</span>
+              </span>
+              <button
+                onClick={() => triggerManualScan('8901234001017')}
+                className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border border-slate-300 whitespace-nowrap font-bold cursor-pointer"
+              >
+                RC 750ml
+              </button>
+              <button
+                onClick={() => triggerManualScan('8901234009013')}
+                className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border border-slate-300 whitespace-nowrap font-bold cursor-pointer"
+              >
+                KF Strong
+              </button>
+              <button
+                onClick={() => triggerManualScan(`WB26EX750${Math.floor(10000 + Math.random() * 90000)}`)}
+                className="px-2 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded border border-amber-300 whitespace-nowrap font-bold cursor-pointer"
+              >
+                2D Hologram
+              </button>
+            </div>
+          </div>
+
+          {/* Big Checkout Buttons */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => {
-                  if (cartItems.length > 0 && confirm('Clear active bill?')) {
+                  setPaymentMode('CASH');
+                  setIsPaymentOpen(true);
+                }}
+                disabled={cartItems.length === 0}
+                className={`py-4 px-4 rounded-xl font-black text-sm flex flex-col items-center justify-center gap-1 transition-all pos-btn-press ${
+                  cartItems.length === 0
+                    ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 cursor-pointer'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Banknote className="w-6 h-6" />
+                  <span className="text-base">CASH PAYMENT</span>
+                </div>
+                <span className="text-[11px] font-mono bg-black/20 text-white px-2.5 py-0.5 rounded font-bold">
+                  Hotkey [F2]
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setPaymentMode('UPI');
+                  setIsPaymentOpen(true);
+                }}
+                disabled={cartItems.length === 0}
+                className={`py-4 px-4 rounded-xl font-black text-sm flex flex-col items-center justify-center gap-1 transition-all pos-btn-press ${
+                  cartItems.length === 0
+                    ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 cursor-pointer'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <QrCode className="w-6 h-6" />
+                  <span className="text-base">ONLINE UPI / QR</span>
+                </div>
+                <span className="text-[11px] font-mono bg-black/20 text-white px-2.5 py-0.5 rounded font-bold">
+                  Hotkey [F3]
+                </span>
+              </button>
+            </div>
+
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => {
+                  if (cartItems.length > 0 && confirm('Clear active bill items?')) {
                     setCartItems([]);
                   }
                 }}
                 disabled={cartItems.length === 0}
-                className="flex-1 py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 rounded-lg text-xs font-mono flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear [Esc]</span>
+                <Trash2 className="w-4 h-4 text-slate-500" />
+                <span>Clear Bill [Esc]</span>
               </button>
 
               {recentSale && (
                 <button
                   onClick={() => setIsReceiptOpen(true)}
-                  className="flex-1 py-1.5 px-3 bg-slate-950 hover:bg-slate-800 text-cyan-400 border border-slate-800 rounded-lg text-xs font-mono flex items-center justify-center gap-1.5"
-                  title="Reprint Last Bill"
+                  className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-blue-50 text-blue-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Reprint [F4]</span>
+                  <Printer className="w-4 h-4 text-blue-600" />
+                  <span>Print Receipt [F4]</span>
                 </button>
               )}
             </div>

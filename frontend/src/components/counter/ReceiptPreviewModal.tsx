@@ -24,31 +24,31 @@ export const ReceiptPreviewModal: React.FC<ReceiptPreviewModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 select-none overflow-y-auto"
       onClick={onClose}
     >
       <div 
-        className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col my-8 animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white border border-slate-200 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col my-8 animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            <span className="text-sm font-bold text-white uppercase tracking-wider">
-              Bill Generated Successfully
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            <span className="text-sm font-black text-slate-900 uppercase tracking-wider">
+              Bill Receipt Generated
             </span>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 80mm Thermal Receipt Simulation Container */}
-        <div className="p-6 bg-slate-950/60 flex justify-center">
+        <div className="p-6 bg-slate-100 flex justify-center">
           <div 
             id="thermal-receipt"
-            className="w-[320px] bg-white text-black p-5 shadow-2xl rounded-sm font-mono text-[11px] leading-tight border border-slate-300"
+            className="w-[320px] bg-white text-black p-5 shadow-xl rounded-sm font-mono text-[11px] leading-tight border border-slate-300"
           >
             {/* Header */}
             <div className="text-center pb-2 border-b border-black">
@@ -59,10 +59,10 @@ export const ReceiptPreviewModal: React.FC<ReceiptPreviewModalProps> = ({
                 {sale.shop?.licensee_name || 'M/s Ghosh & Banerjee Enterprises'}
               </div>
               <div className="text-[9px]">
-                LIC: {sale.shop?.license_no || 'WB/EX/FL/KOL-NORTH/0492/2024-25'}
+                LIC: {sale.shop?.license_no || 'WB/EX/FL/NAD-KRN/0188/2024-25'}
               </div>
               <div className="text-[9px]">
-                {sale.shop?.address || '142/A, Bidhan Sarani, Shyambazar, Kolkata'}
+                {sale.shop?.address || 'Krishnanagar, Nadia, West Bengal - 741101'}
               </div>
               {sale.shop?.gstin && (
                 <div className="text-[9px]">GSTIN: {sale.shop.gstin}</div>
@@ -170,20 +170,20 @@ export const ReceiptPreviewModal: React.FC<ReceiptPreviewModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col gap-2">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <button
               onClick={onPrintDirect}
               disabled={isPrinting}
-              className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+              className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span>{isPrinting ? 'Sending to ESC/POS...' : 'Direct Print (ESC/POS)'}</span>
+              <span>{isPrinting ? 'Sending to Printer...' : 'Print Receipt (ESC/POS 80mm)'}</span>
             </button>
 
             <button
               onClick={() => window.print()}
-              className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="py-3 px-4 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Browser Standard Print Dialog"
             >
               <span>Browser Print</span>
@@ -192,9 +192,9 @@ export const ReceiptPreviewModal: React.FC<ReceiptPreviewModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-cyan-400 font-mono text-xs rounded-lg border border-slate-800 flex items-center justify-center gap-1"
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1 shadow-sm cursor-pointer"
           >
-            <span>[F4 / Esc] Start New Sale</span>
+            <span>Start New Bill [F4 / Esc]</span>
           </button>
         </div>
       </div>

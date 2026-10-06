@@ -9,7 +9,8 @@ import {
   Database,
   Printer,
   Clock,
-  MapPin
+  MapPin,
+  Calendar
 } from 'lucide-react';
 import { ShopSettings } from '../../types';
 
@@ -45,130 +46,165 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  const navItems = [
+    {
+      id: 'pos' as const,
+      num: '1',
+      title: 'Counter Billing',
+      subtitle: 'Fast Checkout [F1]',
+      icon: ShoppingCart,
+      hotkey: 'F1',
+      activeColor: 'bg-emerald-600 text-white shadow-md border-emerald-700 ring-2 ring-emerald-500/20',
+      inactiveColor: 'bg-white text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 border-slate-300 hover:border-emerald-300'
+    },
+    {
+      id: 'ledger' as const,
+      num: '2',
+      title: 'Stock Register',
+      subtitle: 'Daily DSR [F9]',
+      icon: FileSpreadsheet,
+      hotkey: 'F9',
+      activeColor: 'bg-teal-700 text-white shadow-md border-teal-800 ring-2 ring-teal-500/20',
+      inactiveColor: 'bg-white text-slate-800 hover:bg-teal-50 hover:text-teal-700 border-slate-300 hover:border-teal-300'
+    },
+    {
+      id: 'challan' as const,
+      num: '3',
+      title: 'Inward Challan',
+      subtitle: 'Receive Stock [F8]',
+      icon: PackagePlus,
+      hotkey: 'F8',
+      activeColor: 'bg-amber-600 text-white shadow-md border-amber-700 ring-2 ring-amber-500/20',
+      inactiveColor: 'bg-white text-slate-800 hover:bg-amber-50 hover:text-amber-700 border-slate-300 hover:border-amber-300'
+    },
+    {
+      id: 'compliance' as const,
+      num: '4',
+      title: 'e-Abgari Returns',
+      subtitle: 'Excise Portal [F10]',
+      icon: ShieldCheck,
+      hotkey: 'F10',
+      activeColor: 'bg-indigo-600 text-white shadow-md border-indigo-700 ring-2 ring-indigo-500/20',
+      inactiveColor: 'bg-white text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 border-slate-300 hover:border-indigo-300'
+    },
+    {
+      id: 'settings' as const,
+      num: '⚙',
+      title: 'Shop Settings',
+      subtitle: 'Printer & Config',
+      icon: Settings,
+      hotkey: 'Esc',
+      activeColor: 'bg-slate-800 text-white shadow-md border-slate-900',
+      inactiveColor: 'bg-white text-slate-700 hover:bg-slate-100 border-slate-300'
+    }
+  ];
+
   return (
-    <header className="bg-slate-900 border-b border-slate-800 text-slate-100 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 select-none shadow-md">
-      {/* Store Identity: Krishnanagar, Nadia */}
-      <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-slate-950 font-black text-xl shadow-md shadow-emerald-950/40">
-          FL
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-extrabold tracking-tight text-white uppercase">
-              {shopSettings?.shop_name || 'KRISHNANAGAR FL OFF SHOP'}
-            </h1>
-            <span className="text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              <span>Nadia, WB</span>
-            </span>
+    <header className="bg-white border-b-2 border-slate-200 select-none shadow-sm flex flex-col z-20">
+      {/* Top Identity & Quick Utility Strip */}
+      <div className="px-4 py-2 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-white">
+        {/* Shop Name & Krishnanagar, Nadia Location */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-sm">
+            FL
           </div>
-          <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-            <span className="font-mono text-slate-300">Lic: {shopSettings?.license_no || 'WB/EX/FL/NAD-KRN/0188/2024-25'}</span>
-            <span>•</span>
-            <span className="text-emerald-400 font-mono font-medium">Retailer: {shopSettings?.retailer_code || 'WBSBCL-NAD-4102'}</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-black tracking-tight text-slate-900 uppercase">
+                {shopSettings?.shop_name || 'KRISHNANAGAR FL OFF SHOP'}
+              </h1>
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-emerald-600" />
+                <span>Krishnanagar, Nadia (WB)</span>
+              </span>
+            </div>
+            <div className="text-[11px] text-slate-600 flex items-center gap-2 mt-0.5 font-medium">
+              <span className="font-mono text-slate-800 font-bold">License: {shopSettings?.license_no || 'WB/EX/FL/NAD-KRN/0188/2024-25'}</span>
+              <span>•</span>
+              <span className="text-emerald-800 font-mono font-bold">WBSBCL Code: {shopSettings?.retailer_code || 'WBSBCL-NAD-4102'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Info: 1-Click Refresh, Printer, and Live Big Clock */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Refresh Catalog */}
+          <button 
+            onClick={onSyncCatalog}
+            title="Refresh product catalog from local database"
+            className="flex items-center gap-1.5 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 transition-colors shadow-sm cursor-pointer"
+          >
+            <Database className="w-4 h-4 text-emerald-600" />
+            <span>{cachedProductCount} SKUs Loaded</span>
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+          </button>
+
+          {/* 80mm Printer Quick Button */}
+          <button
+            onClick={onOpenPrinterConfig}
+            className="flex items-center gap-1.5 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 transition-colors shadow-sm cursor-pointer"
+            title="80mm Thermal Receipt Printer Setup"
+          >
+            <Printer className="w-4 h-4 text-blue-600" />
+            <span>80mm Printer</span>
+          </button>
+
+          {/* Big Live Clock */}
+          <div className="border-l-2 border-slate-200 pl-3 text-right">
+            <div className="text-base font-mono font-black text-slate-900 flex items-center justify-end gap-1.5 tabular-nums">
+              <Clock className="w-4 h-4 text-emerald-600" />
+              <span>{timeStr}</span>
+            </div>
+            <div className="text-[11px] text-slate-500 font-semibold flex items-center justify-end gap-1">
+              <Calendar className="w-3 h-3 text-slate-400" />
+              <span>{dateStr}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs - Large, Clear & Touch/Click Friendly */}
-      <nav className="flex items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
-        <button
-          onClick={() => setActiveTab('pos')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all pos-btn-press ${
-            activeTab === 'pos'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/60'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-          }`}
-        >
-          <ShoppingCart className="w-4 h-4 text-emerald-300" />
-          <span>Billing Counter</span>
-          <span className="text-[10px] font-mono bg-black/30 px-1.5 py-0.5 rounded text-emerald-200">F1</span>
-        </button>
+      {/* Main Mode Navigation Bar - Extra Large, High Contrast & Worker Friendly */}
+      <nav className="px-3 py-2 bg-slate-100 border-t border-slate-200 flex items-center gap-2 overflow-x-auto">
+        {navItems.map(item => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex-1 min-w-[170px] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border-2 font-sans transition-all pos-btn-press cursor-pointer ${
+                isActive ? item.activeColor : item.inactiveColor
+              }`}
+            >
+              {/* Big Number Badge */}
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0 ${
+                isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-800 border border-slate-300'
+              }`}>
+                {item.num}
+              </div>
 
-        <button
-          onClick={() => setActiveTab('ledger')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all pos-btn-press ${
-            activeTab === 'ledger'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/60'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-          }`}
-        >
-          <FileSpreadsheet className="w-4 h-4 text-cyan-300" />
-          <span>Stock Register (DSR)</span>
-          <span className="text-[10px] font-mono bg-black/30 px-1.5 py-0.5 rounded text-cyan-200">F9</span>
-        </button>
+              {/* Title & Subtitle */}
+              <div className="text-left flex-1 min-w-0">
+                <div className="text-xs sm:text-sm font-black leading-tight truncate">
+                  {item.title}
+                </div>
+                <div className={`text-[10px] font-bold leading-none mt-0.5 truncate ${
+                  isActive ? 'text-white/90' : 'text-slate-500'
+                }`}>
+                  {item.subtitle}
+                </div>
+              </div>
 
-        <button
-          onClick={() => setActiveTab('challan')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all pos-btn-press ${
-            activeTab === 'challan'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/60'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-          }`}
-        >
-          <PackagePlus className="w-4 h-4 text-amber-300" />
-          <span>Inward Stock</span>
-          <span className="text-[10px] font-mono bg-black/30 px-1.5 py-0.5 rounded text-amber-200">F8</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('compliance')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all pos-btn-press ${
-            activeTab === 'compliance'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/60'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4 text-purple-300" />
-          <span>e-Abgari Returns</span>
-          <span className="text-[10px] font-mono bg-black/30 px-1.5 py-0.5 rounded text-purple-200">F10</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`p-2 rounded-lg text-xs font-bold transition-all ${
-            activeTab === 'settings'
-              ? 'bg-emerald-600 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-          title="Store Settings & Printer Config"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+              {/* Hotkey Tag */}
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-black flex-shrink-0 ${
+                isActive ? 'bg-black/25 text-white' : 'bg-slate-100 text-slate-700 border border-slate-300'
+              }`}>
+                {item.hotkey}
+              </span>
+            </button>
+          );
+        })}
       </nav>
-
-      {/* Right Information Bar */}
-      <div className="flex items-center gap-3">
-        {/* Catalog Cached Indicator */}
-        <div 
-          onClick={onSyncCatalog}
-          title="Click to refresh local bottle catalog"
-          className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700 text-xs font-medium"
-        >
-          <Database className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-slate-300 font-mono">{cachedProductCount} Brands</span>
-          <RefreshCw className="w-3 h-3 text-slate-500 hover:text-emerald-400" />
-        </div>
-
-        {/* Printer Quick Trigger */}
-        <button
-          onClick={onOpenPrinterConfig}
-          className="p-1.5 bg-slate-950 text-slate-300 hover:text-white rounded-lg border border-slate-800 hover:border-slate-700 text-xs flex items-center gap-1.5"
-          title="Configure 80mm ESC/POS Thermal Printer"
-        >
-          <Printer className="w-4 h-4 text-cyan-400" />
-          <span className="hidden sm:inline font-mono text-[11px]">80mm Printer</span>
-        </button>
-
-        {/* Live Date & Clock for Krishnanagar Counter */}
-        <div className="border-l border-slate-800 pl-3 text-right">
-          <div className="text-xs font-mono font-bold text-amber-400 flex items-center justify-end gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{timeStr}</span>
-          </div>
-          <div className="text-[11px] text-slate-400 font-sans">{dateStr}</div>
-        </div>
-      </div>
     </header>
   );
 };

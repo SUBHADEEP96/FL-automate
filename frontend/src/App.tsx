@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/shared/Header';
-import { HotkeyBar } from './components/shared/HotkeyBar';
 import { CashierScreen } from './components/counter/CashierScreen';
 import { DailyStockRegister } from './components/ledger/DailyStockRegister';
 import { InwardChallanModal } from './components/ledger/InwardChallanModal';
@@ -46,10 +45,13 @@ export function App() {
     loadInitialData();
   }, [loadInitialData]);
 
-  // Global Function Key Dispatcher (F8 for Challan, F9 for Ledger, F10 for Compliance)
+  // Global Function Key Dispatcher (F1 for POS, F8 for Challan, F9 for Ledger, F10 for Compliance)
   useEffect(() => {
     const handleGlobalKeys = (e: KeyboardEvent) => {
-      if (e.key === 'F8') {
+      if (e.key === 'F1') {
+        e.preventDefault();
+        setActiveTab('pos');
+      } else if (e.key === 'F8') {
         e.preventDefault();
         setIsInwardModalOpen(true);
       } else if (e.key === 'F9') {
@@ -90,7 +92,7 @@ export function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-slate-100 text-slate-900 overflow-hidden font-sans">
       {/* Top Header */}
       <Header
         activeTab={activeTab}
@@ -102,12 +104,14 @@ export function App() {
         onOpenPrinterConfig={() => setIsSettingsOpen(true)}
       />
 
-      {/* Main Workspace Body */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-slate-950">
+      {/* Main Workspace Body - Full remaining height */}
+      <main className="flex-1 flex flex-col overflow-hidden bg-slate-100">
         {activeTab === 'pos' && (
           <CashierScreen
             products={products}
             onRefreshProducts={loadInitialData}
+            onNavigateTab={setActiveTab}
+            onOpenInwardChallan={() => setIsInwardModalOpen(true)}
           />
         )}
 
@@ -120,18 +124,21 @@ export function App() {
 
         {activeTab === 'challan' && (
           <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md">
-              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-2">
-                Depot Inward Consignment Ledger
+            <div className="bg-white border border-slate-200 p-8 rounded-2xl max-w-md shadow-md">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3 text-2xl font-bold border border-amber-200">
+                📦
+              </div>
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-wider mb-2">
+                Inward Stock Consignment (Depot Challan)
               </h3>
-              <p className="text-xs text-slate-400 mb-6">
-                Receive wholesale consignments from WBSBCL, automatically update counter inventory, and register 2D security holograms.
+              <p className="text-xs text-slate-600 mb-6 leading-relaxed">
+                Receive new consignments from WBSBCL depot, record batch numbers, update counter stock, and register 2D excise hologram serials.
               </p>
               <button
                 onClick={() => setIsInwardModalOpen(true)}
-                className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-transform active:scale-95"
+                className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
               >
-                Record New Inward Consignment [F8]
+                New Inward Challan Entry [F8]
               </button>
             </div>
           </div>
@@ -145,33 +152,13 @@ export function App() {
           <div className="flex-1 p-6 flex items-center justify-center">
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs"
+              className="px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-sm shadow-md cursor-pointer"
             >
-              Open Settings & Hardware Configuration
+              Open Shop Settings & 80mm Printer Configuration
             </button>
           </div>
         )}
       </main>
-
-      {/* Hotkey Bar */}
-      <HotkeyBar
-        onF1={() => {
-          if (activeTab !== 'pos') setActiveTab('pos');
-          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1' }));
-        }}
-        onF2={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2' }))}
-        onF3={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F3' }))}
-        onF4={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F4' }))}
-        onF8={() => setIsInwardModalOpen(true)}
-        onF9={() => {
-          setActiveTab('ledger');
-          setTimeout(() => {
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F9' }));
-          }, 100);
-        }}
-        onF10={() => setActiveTab('compliance')}
-        onEscape={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))}
-      />
 
       {/* Inward Consignment Modal */}
       <InwardChallanModal

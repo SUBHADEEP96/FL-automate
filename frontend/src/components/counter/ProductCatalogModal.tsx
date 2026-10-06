@@ -62,29 +62,29 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 select-none"
       onClick={onClose}
     >
       <div 
-        className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Header & Search Bar */}
-        <div className="p-4 bg-slate-950 border-b border-slate-800">
+        <div className="p-4 bg-slate-50 border-b border-slate-200">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                Excise Brand Catalog Search
+              <Package className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                Brand Catalog Search
               </h3>
-              <span className="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+              <span className="text-[11px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
                 [F1] Hotkey
               </span>
             </div>
             <button 
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -100,8 +100,8 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
                 setSearchTerm(e.target.value);
                 setHighlightedIndex(0);
               }}
-              placeholder="Type brand name (e.g. Royal Challenge), pack size, or EAN barcode..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-sans"
+              placeholder="🔍 Search brand name (e.g. Royal Challenge), pack size, or barcode..."
+              className="w-full bg-white border-2 border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-sans font-medium"
             />
           </div>
 
@@ -114,26 +114,26 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
                   setSelectedCategory(cat);
                   setHighlightedIndex(0);
                 }}
-                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-cyan-500 text-slate-950 shadow-md font-bold'
-                    : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    ? 'bg-blue-600 text-white shadow-sm font-black'
+                    : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border border-slate-200'
                 }`}
               >
                 {cat === 'ALL' ? 'All Brands' : cat}
               </button>
             ))}
-            <span className="ml-auto text-[11px] text-slate-500 font-mono">
-              Use ↑ ↓ and Enter
+            <span className="ml-auto text-[11px] text-slate-500 font-mono font-medium">
+              Use ↑ ↓ to navigate and Enter to select
             </span>
           </div>
         </div>
 
         {/* Product List */}
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800/60 p-2">
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-100 p-2">
           {filteredProducts.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              No matching brands found for "{searchTerm}"
+            <div className="p-8 text-center text-slate-500 text-xs font-medium">
+              No brands found matching "{searchTerm}"
             </div>
           ) : (
             filteredProducts.map((p, idx) => {
@@ -146,42 +146,42 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
                     onClose();
                   }}
                   onMouseEnter={() => setHighlightedIndex(idx)}
-                  className={`p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors ${
-                    isSelected ? 'bg-slate-800/90 ring-1 ring-cyan-500/50' : 'hover:bg-slate-800/40'
+                  className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition-colors ${
+                    isSelected ? 'bg-blue-50 ring-2 ring-blue-500/50' : 'hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                      p.category === 'IMFL' ? 'bg-amber-950 text-amber-300 border border-amber-800/60' :
-                      p.category === 'Beer' ? 'bg-yellow-950 text-yellow-300 border border-yellow-800/60' :
-                      p.category === 'Wine' ? 'bg-rose-950 text-rose-300 border border-rose-800/60' :
-                      'bg-purple-950 text-purple-300 border border-purple-800/60'
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black ${
+                      p.category === 'IMFL' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                      p.category === 'Beer' ? 'bg-yellow-100 text-yellow-900 border border-yellow-300' :
+                      p.category === 'Wine' ? 'bg-rose-100 text-rose-900 border border-rose-300' :
+                      'bg-purple-100 text-purple-900 border border-purple-300'
                     }`}>
                       {p.category.slice(0, 2)}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white flex items-center gap-2">
+                      <div className="text-sm font-black text-slate-900 flex items-center gap-2">
                         <span>{p.name}</span>
-                        <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-1.5 py-0.2 rounded">
+                        <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
                           {p.pack_size_ml}ml
                         </span>
                       </div>
-                      <div className="text-xs text-slate-400 font-mono flex items-center gap-2 mt-0.5">
-                        <span>{p.code}</span>
+                      <div className="text-xs text-slate-500 font-mono flex items-center gap-2 mt-0.5">
+                        <span className="font-semibold">{p.code}</span>
                         <span>•</span>
                         <span>EAN: {p.ean}</span>
                         <span>•</span>
-                        <span>Str: {p.strength_pct}%</span>
+                        <span>Str: {p.strength_pct}% v/v</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-sm font-bold font-mono text-emerald-400">
+                    <div className="text-base font-black font-mono text-emerald-700">
                       {formatINR(p.mrp)}
                     </div>
-                    <div className={`text-[11px] font-mono ${p.current_stock < (p.min_stock_alert || 12) ? 'text-rose-400' : 'text-slate-400'}`}>
-                      Stock: <span className="font-bold">{p.current_stock}</span> btls
+                    <div className={`text-[11px] font-mono font-bold ${p.current_stock < (p.min_stock_alert || 12) ? 'text-rose-600' : 'text-slate-600'}`}>
+                      Stock: <span>{p.current_stock}</span> btls
                     </div>
                   </div>
                 </div>
@@ -191,15 +191,15 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 font-medium">
           <div>
-            Showing <strong className="text-white">{filteredProducts.length}</strong> items
+            Total <strong className="text-slate-900 font-bold">{filteredProducts.length}</strong> brands listed
           </div>
           <button
             onClick={onClose}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md font-mono text-xs"
+            className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs cursor-pointer"
           >
-            [Esc] Close
+            Close [Esc]
           </button>
         </div>
       </div>

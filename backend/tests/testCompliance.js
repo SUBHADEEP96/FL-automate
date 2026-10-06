@@ -71,7 +71,12 @@ async function runTestSuite() {
     console.log('\n[Test 3] Simulating POS Checkout with 2D Hologram Binding...');
     const testProduct = db.prepare("SELECT * FROM products WHERE code = 'IMFL-RC-750'").get();
     const initialStock = testProduct.current_stock;
-    const availableHologram = db.prepare("SELECT * FROM holograms WHERE product_id = ? AND status = 'IN_STOCK'").get(testProduct.id);
+    let availableHologram = db.prepare("SELECT * FROM holograms WHERE product_id = ? AND status = 'IN_STOCK'").get(testProduct.id);
+    if (!availableHologram) {
+      const serial = `WB26EX${testProduct.pack_size_ml}${Date.now().toString().slice(-6)}`;
+      const res = db.prepare("INSERT INTO holograms (serial_number, product_id, batch_no, status) VALUES (?, ?, 'B26-TEST', 'IN_STOCK')").run(serial, testProduct.id);
+      availableHologram = db.prepare("SELECT * FROM holograms WHERE id = ?").get(res.lastInsertRowid);
+    }
 
     assert(availableHologram, 'A test hologram must be available');
     const billNo = `WB-FL-TEST-${Date.now().toString().slice(-4)}`;
@@ -139,7 +144,8 @@ async function runTestSuite() {
     // Test 5: Puppeteer Automation against Portal Simulator
     // -------------------------------------------------------------
     console.log('\n[Test 5] Running Puppeteer Automated Portal Worker against e-Abgari Simulator...');
-    const portalUrl = `http://localhost:${server.address().port}/portal-simulator`;
+    const port = server.address() ? server.address().port : (process.env.PORT || 5001);
+    const portalUrl = `http://localhost:${port}/portal-simulator`;
 
     const progressLogs = [];
     const outcome = await runPortalAutomation({

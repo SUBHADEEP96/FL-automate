@@ -121,94 +121,101 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 select-none overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 select-none overflow-y-auto"
       onClick={onClose}
     >
       <div 
-        className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col my-8 animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col my-8 animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <PackagePlus className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-bold text-white uppercase tracking-wider">
-              Record Inward Consignment (Depot Challan)
-            </h3>
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
+              <PackagePlus className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 uppercase tracking-wider">
+                Inward Consignment Challan (Receive Depot Stock)
+              </h3>
+              <div className="text-xs text-slate-500 font-medium">
+                Record incoming WBSBCL depot stock into counter inventory
+              </div>
+            </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Challan Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
             <div>
-              <label className="block text-slate-400 mb-1">Challan / Invoice No.</label>
+              <label className="block text-slate-700 font-bold mb-1">Challan / Invoice No</label>
               <input
                 type="text"
                 value={challanNo}
                 onChange={e => setChallanNo(e.target.value)}
                 required
-                className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono"
+                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-mono font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Challan Date</label>
+              <label className="block text-slate-700 font-bold mb-1">Challan Date</label>
               <input
                 type="date"
                 value={challanDate}
                 onChange={e => setChallanDate(e.target.value)}
                 required
-                className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-medium focus:outline-none focus:border-blue-500 cursor-pointer"
               />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Source WBSBCL Depot</label>
+              <label className="block text-slate-700 font-bold mb-1">Depot Source (WBSBCL)</label>
               <input
                 type="text"
                 value={sourceDepot}
                 onChange={e => setSourceDepot(e.target.value)}
                 required
-                className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-medium focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Transport Vehicle No.</label>
+              <label className="block text-slate-700 font-bold mb-1">Vehicle No</label>
               <input
                 type="text"
                 value={vehicleNo}
                 onChange={e => setVehicleNo(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono"
+                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-mono font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Items Table */}
-          <div className="border border-slate-800 rounded-xl overflow-hidden">
-            <div className="p-3 bg-slate-950 flex items-center justify-between border-b border-slate-800">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <div className="p-3 bg-slate-50 flex items-center justify-between border-b border-slate-200">
+              <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
                 Consignment Line Items
               </span>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded text-xs flex items-center gap-1"
+                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-black rounded-lg text-xs flex items-center gap-1 shadow-sm cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Item Row</span>
+                <span>+ Add Line Item</span>
               </button>
             </div>
 
             <div className="max-h-60 overflow-y-auto">
               {items.length === 0 ? (
-                <div className="p-6 text-center text-slate-500 text-xs">
-                  No line items added. Click "Add Item Row" to receive stock.
+                <div className="p-8 text-center text-slate-500 text-xs font-medium">
+                  No line items added yet. Click "+ Add Line Item" to enter received stock.
                 </div>
               ) : (
-                <table className="w-full text-left text-xs text-slate-200">
-                  <thead className="bg-slate-950 text-slate-400 font-mono text-[11px] uppercase border-b border-slate-800">
+                <table className="w-full text-left text-xs text-slate-900">
+                  <thead className="bg-slate-100 text-slate-700 font-black uppercase border-b border-slate-200">
                     <tr>
                       <th className="p-2.5">Brand / SKU</th>
                       <th className="p-2.5">Batch No</th>
@@ -216,18 +223,18 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
                       <th className="p-2.5 text-center w-20">Btls/Case</th>
                       <th className="p-2.5 text-right w-24">Cost (₹)</th>
                       <th className="p-2.5 text-right w-24">MRP (₹)</th>
-                      <th className="p-2.5 text-right w-24">Total Btls</th>
+                      <th className="p-2.5 text-right w-24">Total Bottles</th>
                       <th className="p-2.5 text-center w-10"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                  <tbody className="divide-y divide-slate-100 font-mono">
                     {items.map((it, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/30">
+                      <tr key={idx} className="hover:bg-blue-50/40">
                         <td className="p-2">
                           <select
                             value={it.productId}
                             onChange={e => handleUpdateItem(idx, 'productId', e.target.value)}
-                            className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white text-xs w-full font-sans"
+                            className="bg-white border border-slate-300 rounded px-2 py-1 text-slate-900 text-xs w-full font-sans font-bold cursor-pointer"
                           >
                             {products.map(p => (
                               <option key={p.id} value={p.id}>
@@ -241,7 +248,7 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
                             type="text"
                             value={it.batchNo}
                             onChange={e => handleUpdateItem(idx, 'batchNo', e.target.value)}
-                            className="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white"
+                            className="w-24 bg-white border border-slate-300 rounded px-2 py-1 text-slate-900 font-bold"
                           />
                         </td>
                         <td className="p-2 text-center">
@@ -250,7 +257,7 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
                             min="1"
                             value={it.cases}
                             onChange={e => handleUpdateItem(idx, 'cases', parseInt(e.target.value) || 0)}
-                            className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white"
+                            className="w-16 bg-white border border-slate-300 rounded px-2 py-1 text-center text-slate-900 font-black"
                           />
                         </td>
                         <td className="p-2 text-center">
@@ -259,7 +266,7 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
                             min="1"
                             value={it.bottlesPerCase}
                             onChange={e => handleUpdateItem(idx, 'bottlesPerCase', parseInt(e.target.value) || 0)}
-                            className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white"
+                            className="w-16 bg-white border border-slate-300 rounded px-2 py-1 text-center text-slate-900 font-bold"
                           />
                         </td>
                         <td className="p-2 text-right">
@@ -268,22 +275,22 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
                             step="any"
                             value={it.purchaseRate}
                             onChange={e => handleUpdateItem(idx, 'purchaseRate', parseFloat(e.target.value) || 0)}
-                            className="w-20 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white"
+                            className="w-20 bg-white border border-slate-300 rounded px-2 py-1 text-right text-slate-900 font-bold"
                           />
                         </td>
-                        <td className="p-2 text-right font-medium text-slate-300">
+                        <td className="p-2 text-right font-black text-slate-800">
                           ₹{it.mrp}
                         </td>
-                        <td className="p-2 text-right font-bold text-amber-400">
+                        <td className="p-2 text-right font-black text-amber-700">
                           {it.cases * it.bottlesPerCase}
                         </td>
                         <td className="p-2 text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(idx)}
-                            className="text-slate-500 hover:text-rose-400 p-1"
+                            className="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
@@ -295,29 +302,29 @@ export const InwardChallanModal: React.FC<InwardChallanModalProps> = ({
           </div>
 
           {/* Totals Summary */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-6 text-xs font-mono">
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-6 text-xs font-mono font-bold">
               <div>
-                <span className="text-slate-400">Cases: </span>
-                <strong className="text-white text-sm">{totalCases}</strong>
+                <span className="text-slate-600">Total Cases: </span>
+                <strong className="text-slate-900 text-sm font-black">{totalCases}</strong>
               </div>
               <div>
-                <span className="text-slate-400">Total Bottles: </span>
-                <strong className="text-amber-400 text-sm">{totalBottles}</strong>
+                <span className="text-slate-600">Total Bottles: </span>
+                <strong className="text-amber-700 text-sm font-black">{totalBottles}</strong>
               </div>
               <div>
-                <span className="text-slate-400">Consignment Value: </span>
-                <strong className="text-emerald-400 text-sm">{formatINR(totalAmount)}</strong>
+                <span className="text-slate-600">Invoice Value: </span>
+                <strong className="text-emerald-700 text-sm font-black">{formatINR(totalAmount)}</strong>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting || items.length === 0}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs flex items-center gap-2 shadow-md pos-btn-press cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>{isSubmitting ? 'Receiving...' : 'Verify & Add to Counter Stock'}</span>
+              <span>{isSubmitting ? 'Receiving...' : 'Verify & Add to Inventory'}</span>
             </button>
           </div>
         </form>

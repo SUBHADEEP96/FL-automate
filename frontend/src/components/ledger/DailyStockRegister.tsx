@@ -5,14 +5,14 @@ import {
   Download, 
   ShieldCheck, 
   AlertTriangle, 
-  Sparkles, 
   CheckCircle2, 
-  Layers,
   Search,
-  Filter,
-  RefreshCw
+  RefreshCw,
+  Wine,
+  TrendingUp,
+  Package
 } from 'lucide-react';
-import { DSRSummary, Product } from '../../types';
+import { DSRSummary } from '../../types';
 import { DayCloseWizardModal } from './DayCloseWizardModal';
 import { formatINR, formatBL, formatLPL } from '../../utils/exciseCalc';
 
@@ -90,8 +90,8 @@ export const DailyStockRegister: React.FC<DailyStockRegisterProps> = ({
   if (loading && !dsrData) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
-        <RefreshCw className="w-6 h-6 animate-spin text-emerald-400 mr-2" />
-        <span>Loading West Bengal Excise Register...</span>
+        <RefreshCw className="w-6 h-6 animate-spin text-emerald-600 mr-2" />
+        <span>Loading Daily Stock Register...</span>
       </div>
     );
   }
@@ -105,271 +105,250 @@ export const DailyStockRegister: React.FC<DailyStockRegisterProps> = ({
   }) || [];
 
   return (
-    <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto select-none">
+    <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto select-none bg-slate-100">
       {/* Top Header & Actions Bar */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div>
-          <div className="flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white uppercase tracking-wider">
-              Daily Stock & Sales Register (DSR)
-            </h2>
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase ${
-              dsrData?.status === 'SUBMITTED_TO_EABGARI'
-                ? 'bg-purple-950 text-purple-300 border border-purple-700'
-                : dsrData?.status === 'FINALIZED'
-                ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
-                : 'bg-amber-950 text-amber-300 border border-amber-700'
-            }`}>
-              STATUS: {dsrData?.status || 'OPEN'}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-300 flex items-center justify-center text-teal-700 font-black text-sm">
+              DSR
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-slate-900 uppercase tracking-wider">
+                Daily Stock Register (DSR)
+              </h2>
+              <div className="text-xs text-slate-600 flex items-center gap-2 mt-0.5 font-medium">
+                <span>Krishnanagar FL Off-Shop (Nadia Range)</span>
+                <span>•</span>
+                <span className={`font-bold ${
+                  dsrData?.status === 'FINALIZED' ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300' : 'text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-300'
+                }`}>
+                  Status: {dsrData?.status === 'FINALIZED' ? 'FINALIZED' : 'OPEN'}
+                </span>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Statutory ledger compliant with Bengal Excise Act, 1909 & WBSBCL Retail Regulations.
-          </p>
         </div>
 
-        {/* Date Selector & Action Buttons */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-mono">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+        {/* Date Picker & Big Actions */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-300 px-3.5 py-2 rounded-xl text-xs font-mono shadow-xs">
+            <Calendar className="w-4 h-4 text-teal-600" />
             <input
               type="date"
               value={selectedDate}
               onChange={e => setSelectedDate(e.target.value)}
-              className="bg-transparent text-white focus:outline-none"
+              className="bg-transparent text-slate-900 font-black focus:outline-none cursor-pointer"
             />
           </div>
 
           <button
             onClick={() => setIsWizardOpen(true)}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-950 active:scale-95"
+            className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md pos-btn-press cursor-pointer"
           >
-            <span>Run Day-Close [F9]</span>
+            <span>Day Close [F9]</span>
           </button>
 
           <button
             onClick={handleExportExcel}
             disabled={isExporting}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-950 active:scale-95"
-            title="Download formatted WBSBCL Excel file"
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md pos-btn-press cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>{isExporting ? 'Exporting...' : 'Export Excel (.xlsx)'}</span>
+            <Download className="w-4 h-4" />
+            <span>{isExporting ? 'Exporting...' : 'WBSBCL Excel Export'}</span>
           </button>
 
           <button
             onClick={onOpenCompliance}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-950 active:scale-95"
+            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md pos-btn-press cursor-pointer"
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Portal Filing [F10]</span>
+            <ShieldCheck className="w-4 h-4" />
+            <span>e-Abgari Portal [F10]</span>
           </button>
         </div>
       </div>
 
-      {/* Discrepancy Alert Banner */}
-      {summary && summary.totals.discrepancyCount > 0 && (
-        <div className="bg-rose-950/40 border border-rose-800/80 rounded-xl p-3.5 flex items-center justify-between gap-3 text-rose-200">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-5 h-5 text-rose-400 flex-shrink-0" />
+      {/* Discrepancy Status Banner */}
+      {summary && (
+        summary.totals.discrepancyCount > 0 ? (
+          <div className="bg-rose-50 border-2 border-rose-400 rounded-2xl p-4 flex items-center justify-between gap-3 text-rose-900 shadow-sm">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-6 h-6 text-rose-600 flex-shrink-0" />
+              <div>
+                <strong className="text-base text-rose-900 font-black">
+                  Stock Discrepancy Alert ({summary.totals.discrepancyCount} items mismatched)
+                </strong>
+                <p className="text-xs text-rose-700 mt-0.5 font-medium">
+                  Physical bottle count differs from calculated stock ledger. Please reconcile via the Day Close wizard.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsWizardOpen(true)}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-sm cursor-pointer"
+            >
+              Resolve Discrepancy
+            </button>
+          </div>
+        ) : (
+          <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3 px-4 flex items-center gap-3 text-emerald-900 shadow-xs">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
             <div className="text-xs">
-              <strong className="text-rose-300 font-bold">AUDIT DISCREPANCY DETECTED:</strong>{' '}
-              {summary.totals.discrepancyCount} product items have variances between theoretical opening + receipts - sales and physical counter inventory.
+              <strong className="text-emerald-800 font-extrabold">Counter Stock Verified:</strong>{' '}
+              Opening Stock + Inward Consignment - Sales = Closing Stock (100% matched).
             </div>
           </div>
-          <button
-            onClick={() => setIsWizardOpen(true)}
-            className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-xs font-bold font-mono"
-          >
-            Reconcile Now
-          </button>
-        </div>
+        )
       )}
 
-      {/* Primary KPI Metrics Grid */}
+      {/* Primary KPI Metric Cards (Friendly, large numbers on clean white cards) */}
       {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">OPENING</div>
-            <div className="text-lg font-mono font-bold text-white mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Opening Stock</div>
+            <div className="text-2xl font-mono font-black text-slate-900 mt-1">
               {summary.totals.totalOpeningBottles}
             </div>
-            <div className="text-[10px] text-slate-500">Bottles</div>
+            <div className="text-[11px] text-slate-500 font-medium">Opening (Btls)</div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">INWARD</div>
-            <div className="text-lg font-mono font-bold text-cyan-400 mt-1">
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Inward Received</div>
+            <div className="text-2xl font-mono font-black text-blue-700 mt-1">
               +{summary.totals.totalInwardBottles}
             </div>
-            <div className="text-[10px] text-slate-500">Depot Receipts</div>
+            <div className="text-[11px] text-slate-500 font-medium">Inward (Btls)</div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">DAILY SALES</div>
-            <div className="text-lg font-mono font-bold text-emerald-400 mt-1">
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Bottles Sold</div>
+            <div className="text-2xl font-mono font-black text-emerald-700 mt-1">
               {summary.totals.totalSalesBottles}
             </div>
-            <div className="text-[10px] text-slate-500">Bottles Sold</div>
+            <div className="text-[11px] text-slate-500 font-medium">Sold (Btls)</div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">BREAKAGE</div>
-            <div className="text-lg font-mono font-bold text-rose-400 mt-1">
-              {summary.totals.totalBreakageBottles}
-            </div>
-            <div className="text-[10px] text-slate-500">Wastage / Leakage</div>
-          </div>
-
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">CLOSING</div>
-            <div className="text-lg font-mono font-bold text-white mt-1">
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Closing Stock</div>
+            <div className="text-2xl font-mono font-black text-amber-700 mt-1">
               {summary.totals.totalClosingBottles}
             </div>
-            <div className="text-[10px] text-slate-500">Counter Stock</div>
+            <div className="text-[11px] text-slate-500 font-medium">Closing (Btls)</div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">BULK LITRES</div>
-            <div className="text-lg font-mono font-bold text-cyan-400 mt-1">
-              {summary.totals.totalSalesBL.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-slate-500">Sales BL Volume</div>
-          </div>
-
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">LONDON PROOF</div>
-            <div className="text-lg font-mono font-bold text-amber-400 mt-1">
-              {summary.totals.totalSalesLPL.toFixed(2)}
-            </div>
-            <div className="text-[10px] text-slate-500">Sales LPL Volume</div>
-          </div>
-
-          <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-slate-400">GROSS VALUE</div>
-            <div className="text-lg font-mono font-bold text-emerald-400 mt-1">
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Total Sale Value</div>
+            <div className="text-2xl font-mono font-black text-emerald-700 mt-1">
               {formatINR(summary.totals.totalSalesValue)}
             </div>
-            <div className="text-[10px] text-slate-500">Daily Revenue</div>
+            <div className="text-[11px] text-slate-500 font-medium">Total Sale (₹)</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Bulk Litres</div>
+            <div className="text-xl font-mono font-black text-blue-700 mt-1">
+              {summary.totals.totalSalesBL.toFixed(2)} BL
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium">Bulk Litres (BL)</div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase">Proof Litres</div>
+            <div className="text-xl font-mono font-black text-amber-700 mt-1">
+              {summary.totals.totalSalesLPL.toFixed(2)} LPL
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium">London Proof (LPL)</div>
           </div>
         </div>
       )}
 
-      {/* Category Summaries Breakdown */}
-      {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          {Object.entries(summary.categoryBreakdown).map(([cat, data]) => (
-            <div key={cat} className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
-              <div className="flex items-center justify-between mb-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  cat === 'IMFL' ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-                  cat === 'Beer' ? 'bg-yellow-950 text-yellow-300 border border-yellow-800' :
-                  cat === 'Wine' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
-                  'bg-purple-950 text-purple-300 border border-purple-800'
-                }`}>
-                  {cat}
-                </span>
-                <span className="text-xs font-mono font-bold text-emerald-400">
-                  {formatINR(data.salesValue)}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-1 text-[11px] font-mono text-slate-400">
-                <div>Sold: <strong className="text-white">{data.bottlesSold}</strong></div>
-                <div>BL: <strong className="text-cyan-400">{data.bl.toFixed(2)}</strong></div>
-                <div>LPL: <strong className="text-amber-400">{data.lpl.toFixed(2)}</strong></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Product-level Detailed Stock Register Table */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex-1 flex flex-col">
-        {/* Table Filter Toolbar */}
-        <div className="p-3 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
-          <div className="relative w-72">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      {/* Product-level Stock Register Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex-1 flex flex-col shadow-sm">
+        {/* Table Search & Filter Toolbar */}
+        <div className="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div className="relative w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search product code or brand..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-400"
+              placeholder="🔍 Search by brand name or SKU code..."
+              className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
             />
           </div>
 
           <div className="flex items-center gap-1.5">
-            {['ALL', 'IMFL', 'Beer', 'Wine', 'CS'].map(cat => (
+            {[
+              { id: 'ALL', label: 'All Categories' },
+              { id: 'IMFL', label: 'IMFL / Spirits' },
+              { id: 'Beer', label: 'Beer' },
+              { id: 'Wine', label: 'Wine' },
+              { id: 'CS', label: 'Country Spirit (CS)' }
+            ].map(cat => (
               <button
-                key={cat}
-                onClick={() => setCategoryFilter(cat)}
-                className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
-                  categoryFilter === cat
-                    ? 'bg-slate-800 text-white border border-slate-600 font-bold'
-                    : 'text-slate-400 hover:text-white'
+                key={cat.id}
+                onClick={() => setCategoryFilter(cat.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  categoryFilter === cat.id
+                    ? 'bg-blue-600 text-white shadow-sm font-black'
+                    : 'text-slate-700 hover:bg-slate-200 bg-slate-100 border border-slate-200'
                 }`}
               >
-                {cat}
+                {cat.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Detailed Table */}
+        {/* Detailed Register Table */}
         <div className="overflow-x-auto flex-1 max-h-96">
-          <table className="w-full text-left text-xs text-slate-200 border-collapse">
-            <thead className="bg-slate-950 text-[11px] font-mono text-slate-400 uppercase sticky top-0 border-b border-slate-800">
+          <table className="w-full text-left text-xs text-slate-800 border-collapse">
+            <thead className="bg-slate-100 text-slate-700 uppercase sticky top-0 border-b border-slate-200 font-black">
               <tr>
-                <th className="p-2.5">SKU Code</th>
-                <th className="p-2.5">Brand & Description</th>
-                <th className="p-2.5 text-center">Cat</th>
-                <th className="p-2.5 text-right">Pack (ml)</th>
-                <th className="p-2.5 text-right">Str %</th>
-                <th className="p-2.5 text-right">Opening</th>
-                <th className="p-2.5 text-right">Inward</th>
-                <th className="p-2.5 text-right">Sales</th>
-                <th className="p-2.5 text-right">Breakage</th>
-                <th className="p-2.5 text-right">Closing</th>
-                <th className="p-2.5 text-right">Sales BL</th>
-                <th className="p-2.5 text-right">Sales LPL</th>
-                <th className="p-2.5 text-right">MRP (₹)</th>
-                <th className="p-2.5 text-right">Turnover</th>
-                <th className="p-2.5 text-center">Status</th>
+                <th className="p-3">Brand Name</th>
+                <th className="p-3 text-center">Category</th>
+                <th className="p-3 text-right">Pack Size</th>
+                <th className="p-3 text-right">Opening</th>
+                <th className="p-3 text-right">Inward</th>
+                <th className="p-3 text-right">Sales</th>
+                <th className="p-3 text-right">Closing</th>
+                <th className="p-3 text-right">MRP (₹)</th>
+                <th className="p-3 text-right">Sales Value (₹)</th>
+                <th className="p-3 text-right">BL (Litres)</th>
+                <th className="p-3 text-right">LPL (Litres)</th>
+                <th className="p-3 text-center">Audit Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-mono">
+            <tbody className="divide-y divide-slate-100 font-sans">
               {filteredItems.map(item => (
-                <tr key={item.productId} className="hover:bg-slate-800/40">
-                  <td className="p-2.5 text-slate-400">{item.code}</td>
-                  <td className="p-2.5 font-sans font-medium text-white truncate max-w-[200px]">
-                    {item.name}
+                <tr key={item.productId} className="hover:bg-blue-50/50 transition-colors">
+                  <td className="p-3 font-medium text-slate-900 truncate max-w-[220px]">
+                    <div className="font-extrabold text-sm text-slate-900">{item.name}</div>
+                    <div className="text-[10px] text-slate-500 font-mono font-semibold">{item.code}</div>
                   </td>
-                  <td className="p-2.5 text-center">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">
+                  <td className="p-3 text-center">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                       {item.category}
                     </span>
                   </td>
-                  <td className="p-2.5 text-right">{item.packSizeMl}</td>
-                  <td className="p-2.5 text-right text-slate-400">{item.strengthPct}%</td>
-                  <td className="p-2.5 text-right text-slate-300">{item.opening}</td>
-                  <td className="p-2.5 text-right text-cyan-400">+{item.inward}</td>
-                  <td className="p-2.5 text-right text-emerald-400">-{item.sales}</td>
-                  <td className="p-2.5 text-right text-rose-400">{item.breakage}</td>
-                  <td className="p-2.5 text-right font-bold text-white">{item.physicalClosing}</td>
-                  <td className="p-2.5 text-right text-cyan-300">{item.salesBL.toFixed(3)}</td>
-                  <td className="p-2.5 text-right text-amber-300">{item.salesLPL.toFixed(3)}</td>
-                  <td className="p-2.5 text-right">₹{item.mrp}</td>
-                  <td className="p-2.5 text-right font-bold text-emerald-400">
+                  <td className="p-3 text-right font-mono font-bold text-slate-800">{item.packSizeMl}ml</td>
+                  <td className="p-3 text-right font-mono text-slate-600 font-medium">{item.opening}</td>
+                  <td className="p-3 text-right font-mono text-blue-700 font-bold">+{item.inward}</td>
+                  <td className="p-3 text-right font-mono text-emerald-700 font-black">-{item.sales}</td>
+                  <td className="p-3 text-right font-mono font-black text-slate-900">{item.physicalClosing}</td>
+                  <td className="p-3 text-right font-mono text-slate-700 font-medium">₹{item.mrp}</td>
+                  <td className="p-3 text-right font-mono font-bold text-emerald-700">
                     {formatINR(item.salesValue)}
                   </td>
-                  <td className="p-2.5 text-center">
+                  <td className="p-3 text-right font-mono text-blue-700">{item.salesBL.toFixed(3)}</td>
+                  <td className="p-3 text-right font-mono text-amber-700">{item.salesLPL.toFixed(3)}</td>
+                  <td className="p-3 text-center font-mono">
                     {item.discrepancy !== 0 ? (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-rose-950 text-rose-300 border border-rose-800">
-                        Diff {item.discrepancy > 0 ? `+${item.discrepancy}` : item.discrepancy}
+                      <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
+                        Mismatch {item.discrepancy}
                       </span>
                     ) : (
-                      <span className="text-emerald-400">✓ OK</span>
+                      <span className="text-emerald-700 font-black">✓ Verified OK</span>
                     )}
                   </td>
                 </tr>
